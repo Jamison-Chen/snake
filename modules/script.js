@@ -4,36 +4,27 @@ import {
 import {
     Graph
 } from './graph.js';
+const dijkstraBtn = document.getElementById("dijkstra-btn");
+const playBtn = document.getElementById("play-btn");
+const main = document.getElementById("main");
 const size = 20;
 let grid;
-// const borderColor = "#AAA";
 let allNodes;
 let allEdgesAndCosts;
 let map;
-let headPos = [9, 4];
-let body = [
-    [9, 2],
-    [9, 3]
-];
+let headPos;
+let body;
 let storedTail;
-let foodPos = [9, 15];
-let stillAlive = true;
-let direction = 4;
+let foodPos;
+let stillAlive;
+let directions;
+let inertia;
+let deepPath;
 
-
-function test() {
-    let a = [1, 2];
-    let b = [1, 2];
-    let c = [
-        [1, 2],
-        [3, 4]
-    ];
-    console.log(a == b);
-    console.log(a[0] == b[0] && a[1] == b[1]);
-    console.log(String(a) == String(b));
-    console.log(JSON.parse(JSON.stringify(c)));
-    // console.log(String([1, 2]));
-}
+// function test() {
+//     let a = [1]
+//     console.log(a[a.length - 1]);
+// }
 
 // test();
 
@@ -118,6 +109,7 @@ function arrary2graphInfo(aGrid) {
 
 function setup() {
     initGridDOM();
+    initVarVal();
     clearBoard();
     addAllEventListener();
 }
@@ -134,21 +126,34 @@ function initGridDOM() {
             cellDiv.style.width = `${divSideLen}%`;
             cellDiv.style.height = "0";
             cellDiv.style.paddingTop = `${divSideLen}%`;
-            // cellDiv.style.transitionDuration = "250ms";
-            if (i == 0) {
-                cellDiv.style.borderTopWidth = "1px";
-            }
-            if (j == size - 1) {
-                cellDiv.style.borderRightWidth = "1px";
-                if (i == size - 1) {
-                    cellDiv.style.borderRightWidth = "1px";
-                }
-            }
+            cellDiv.style.border = "1px solid";
+            // if (i == 0) {
+            //     cellDiv.style.borderTopWidth = "1px";
+            // }
+            // if (j == size - 1) {
+            //     cellDiv.style.borderRightWidth = "1px";
+            //     if (i == size - 1) {
+            //         cellDiv.style.borderRightWidth = "1px";
+            //     }
+            // }
             rowDiv.appendChild(cellDiv);
         }
-        let main = document.getElementById("main");
         main.appendChild(rowDiv);
     }
+}
+
+function initVarVal() {
+    headPos = [9, 4];
+    body = [
+        [9, 2],
+        [9, 3]
+    ];
+    foodPos = [9, 15];
+    stillAlive = true;
+    deepPath = [];
+    directions = [
+        [0, 1]
+    ];
 }
 
 function clearBoard() {
@@ -163,16 +168,82 @@ function clearBoard() {
 }
 
 function addAllEventListener() {
-    // document.addEventListener("keydown", moveSnake);
+    playBtn.onclick = startPlaying;
+    playBtn.disabled = false;
     // document.getElementById("clear-board-btn").onclick = clearBoard;
-    document.getElementById("play-btn").onclick = startPlaying;
-    // document.getElementById("computer-btn").onclick = createMaze;
+    dijkstraBtn.onclick = dijkstraPlaying;
+    dijkstraBtn.disabled = false;
 }
 
 function startPlaying() {
-    // removeAllEventListener();
-    loop();
-    // addAllEventListener();
+    removeAllEventListener("human");
+    document.addEventListener("keydown", moveSnake);
+    initVarVal();
+    clearBoard();
+    humanLoop();
+}
+
+function moveSnake(e) {
+    if (e.keyCode == '38') { //up
+        if (directions.length == 0) {
+            if (inertia[0] != 1) {
+                directions.push([-1, 0]);
+            }
+        } else if (directions[directions.length - 1][0] != 1) {
+            directions.push([-1, 0]);
+        }
+    } else if (e.keyCode == '40') { //down
+        if (directions.length == 0) {
+            if (inertia[0] != -1) {
+                directions.push([1, 0]);
+            }
+        } else if (directions[directions.length - 1][0] != -1) {
+            directions.push([1, 0]);
+        }
+    } else if (e.keyCode == '37') { //left
+        if (directions.length == 0) {
+            if (inertia[1] != 1) {
+                directions.push([0, -1]);
+            }
+        } else if (directions[directions.length - 1][1] != 1) {
+            directions.push([0, -1]);
+        }
+    } else if (e.keyCode == '39') { //right
+        if (directions.length == 0) {
+            if (inertia[1] != -1) {
+                directions.push([0, 1]);
+            }
+        } else if (directions[directions.length - 1][1] != -1) {
+            directions.push([0, 1]);
+        }
+    }
+}
+
+function humanLoop() {
+    if (stillAlive) {
+        let nextHeadPos;
+        if (directions.length != 0) {
+            nextHeadPos = [headPos[0] + directions[0][0], headPos[1] + directions[0][1]];
+            inertia = [directions[0][0], directions[0][1]];
+            directions.shift();
+        } else {
+            nextHeadPos = [headPos[0] + inertia[0], headPos[1] + inertia[1]];
+        }
+        if (Math.abs(foodPos[0] - nextHeadPos[0]) == 1 && Math.abs(foodPos[1] - nextHeadPos[1]) == 1) {
+            storedTail = [body[0][0], body[0][1]];
+        }
+        moveForward(nextHeadPos, "human");
+        setTimeout(humanLoop, 100);
+    } else {
+        stopPlaying();
+    }
+}
+
+function dijkstraPlaying() {
+    removeAllEventListener("computer");
+    initVarVal();
+    clearBoard();
+    dijkstraLoop();
 }
 
 function createGraphStructure(aGrid) {
@@ -182,33 +253,46 @@ function createGraphStructure(aGrid) {
     map = new Graph(allNodes, allEdgesAndCosts);
 }
 
-function loop() {
+function dijkstraLoop() {
     if (stillAlive) {
         createGraphStructure(grid);
         let dijResult = dijkstra(); //Iterative Approach
         let shortestPath = dijResult.shortestPath[String(foodPos)];
         if (shortestPath != undefined) {
+            deepPath = [];
             if (shortestPath.length > 1) {
                 if (shortestPath.length == 2) {
                     storedTail = [body[0][0], body[0][1]];
                 }
-                moveForward(dijResult.shortestPath[String(foodPos)]);
+                moveForward(dijResult.shortestPath[String(foodPos)], "computer");
             } else if (shortestPath.length == 1) {
                 growthUp();
                 placeNewFood();
             }
         } else {
             // Go-Deep Strategy
-            let shortestD = dijResult.shortestD;
-            let maxD = 0;
-            let maxTarget = null;
-            for (let each in shortestD) {
-                if (shortestD[each] >= maxD && shortestD[each] != Infinity) {
-                    maxD = shortestD[each];
-                    maxTarget = each;
+            if (deepPath.length == 0) {
+                let shortestD = dijResult.shortestD;
+                let maxD = 0;
+                let maxTarget = null;
+                for (let each in shortestD) {
+                    if (shortestD[each] >= maxD && shortestD[each] != Infinity) {
+                        maxD = shortestD[each];
+                        maxTarget = each;
+                    }
                 }
+                deepPath = JSON.parse(JSON.stringify(dijResult.shortestPath[maxTarget]));
             }
-            moveForward(dijResult.shortestPath[maxTarget]);
+            if (deepPath.length > 1) {
+                moveForward(deepPath, "computer");
+                deepPath.splice(1, 1);
+                if (deepPath.length == 1) {
+                    deepPath = [];
+                }
+            } else {
+                stillAlive = false
+            }
+
             // Random Strategy
             // let randomTargets = [];
             // if (headPos[0] > 0) {
@@ -236,20 +320,42 @@ function loop() {
             //     randomTargets[Math.floor(Math.random() * randomTargets.length)]
             // ]);
         }
-        setTimeout(loop, 0);
+        setTimeout(dijkstraLoop, 0);
+    } else {
+        stopPlaying();
     }
 }
 
-function moveForward(aPath) {
-    if (!grid[aPath[1][0]][aPath[1][1]].isBody) {
+function moveForward(aPath, mode) {
+    if (mode == "human") {
+        let nextHead;
+        try {
+            nextHead = grid[aPath[0]][aPath[1]];
+        } catch {
+            stillAlive = false;
+            return;
+        }
+        if (nextHead == undefined || nextHead.isBody) {
+            stillAlive = false;
+        } else {
+            grid[headPos[0]][headPos[1]].setBody(document.getElementById(`${headPos[0]},${headPos[1]}`));
+            body.push([headPos[0], headPos[1]]);
+            headPos = [aPath[0], aPath[1]];
+            grid[headPos[0]][headPos[1]].setHead(document.getElementById(`${headPos[0]},${headPos[1]}`));
+            if (headPos[0] == foodPos[0] && headPos[1] == foodPos[1]) {
+                placeNewFood();
+            } else {
+                let removedBody = body.shift();
+                grid[removedBody[0]][removedBody[1]].setBlank(document.getElementById(`${removedBody[0]},${removedBody[1]}`));
+            }
+        }
+    } else {
         grid[headPos[0]][headPos[1]].setBody(document.getElementById(`${headPos[0]},${headPos[1]}`));
         body.push([headPos[0], headPos[1]]);
         headPos = [aPath[1][0], aPath[1][1]];
         grid[headPos[0]][headPos[1]].setHead(document.getElementById(`${headPos[0]},${headPos[1]}`));
         let removedBody = body.shift();
         grid[removedBody[0]][removedBody[1]].setBlank(document.getElementById(`${removedBody[0]},${removedBody[1]}`));
-    } else {
-        stillAlive = false;
     }
 }
 
@@ -277,29 +383,20 @@ function placeNewFood() {
 
 }
 
-// function removeAllEventListener() {
-//     document.removeEventListener("keydown", moveSnake);
-//     // document.getElementById("clear-board-btn").onclick = null;
-//     document.getElementById("play-btn").onclick = null;
-//     document.getElementById("computer-btn").onclick = null;
-// }
+function stopPlaying() {
+    addAllEventListener();
+}
 
-// function moveSnake(e) {
-//     let nextHeadPos = headPos;
-//     if (e.keyCode == '38') {
-//         direction = 1;
-//         nextHeadPos = [nextHeadPos[0] - 1, nextHeadPos[1]];
-//     } else if (e.keyCode == '40') {
-//         direction = 2;
-//         nextHeadPos = [nextHeadPos[0] + 1, nextHeadPos[1]];
-//     } else if (e.keyCode == '37') {
-//         direction = 3;
-//         nextHeadPos = [nextHeadPos[0], nextHeadPos[1] - 1];
-//     } else if (e.keyCode == '39') {
-//         direction = 4;
-//         nextHeadPos = [nextHeadPos[0], nextHeadPos[1] + 1];
-//     }
-// }
+function removeAllEventListener(mode) {
+    if (mode != "human") {
+        document.removeEventListener("keydown", moveSnake);
+    }
+    // document.getElementById("clear-board-btn").onclick = null;
+    playBtn.onclick = undefined;
+    playBtn.disabled = true;
+    dijkstraBtn.onclick = undefined;
+    dijkstraBtn.disabled = true;
+}
 
 function initSnakeAndFood() {
     grid[headPos[0]][headPos[1]].setHead(document.getElementById(`${headPos[0]},${headPos[1]}`));

@@ -1,5 +1,6 @@
 const foodColor = "#DB4437";
 const bodyColor = "#000";
+const borderColor = "#AAA";
 const headColor = "#AAA";
 export class Cell {
     constructor(DOMelement) {
@@ -8,7 +9,7 @@ export class Cell {
         this.isFood = false;
         this.isBlank = true;
         DOMelement.style.backgroundColor = "";
-        // DOMelement.style.borderColor = borderColor;
+        DOMelement.style.borderColor = borderColor;
     }
     setBlank(DOMelement) {
         this.isBody = false;
@@ -16,7 +17,7 @@ export class Cell {
         this.isFood = false;
         this.isBlank = true;
         DOMelement.style.backgroundColor = "";
-        // DOMelement.style.borderColor = borderColor;
+        DOMelement.style.borderColor = borderColor;
     }
     setHead(DOMelement) {
         this.isBody = false;
@@ -24,7 +25,7 @@ export class Cell {
         this.isFood = false;
         this.isBlank = false;
         DOMelement.style.backgroundColor = headColor;
-        // DOMelement.style.borderColor = borderColor;
+        DOMelement.style.borderColor = headColor;
     }
     setBody(DOMelement) {
         this.isBody = true;
@@ -32,7 +33,7 @@ export class Cell {
         this.isFood = false;
         this.isBlank = false;
         DOMelement.style.backgroundColor = bodyColor;
-        // DOMelement.style.borderColor = borderColor;
+        DOMelement.style.borderColor = bodyColor;
     }
     setFood(DOMelement) {
         this.isBody = false;
@@ -40,6 +41,6 @@ export class Cell {
         this.isFood = true;
         this.isBlank = false;
         DOMelement.style.backgroundColor = foodColor;
-        // DOMelement.style.borderColor = borderColor;
+        DOMelement.style.borderColor = foodColor;
     }
 }

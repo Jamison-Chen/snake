@@ -107,15 +107,23 @@ body {
     background-color: #007139;
 }
 
-#computer-btn {
+#play-btn:disabled {
+    background-color: #CCC;
+}
+
+#dijkstra-btn {
     color: #fff;
     background-color: #444;
 }
 
-#computer-btn:hover {
+#dijkstra-btn:hover {
     background-color: #222;
 }
 
-#computer-btn:active {
+#dijkstra-btn:active {
     background-color: #000;
+}
+
+#dijkstra-btn:disabled {
+    background-color: #CCC;
 }
