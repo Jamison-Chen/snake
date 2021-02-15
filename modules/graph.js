@@ -10,10 +10,9 @@ export class Graph {
         });
     }
     getCosts(n1, n2) {
-        if (this.graph[String(n1)][String(n2)] != 0) {
+        if (this.graph[String(n1)][String(n2)] != 0 && this.graph[String(n1)][String(n2)] != undefined) {
             return this.graph[String(n1)][String(n2)];
-        }
-        else if (n1[0] == n2[0] && n1[1] == n2[1]) {
+        } else if (String[n1] == String(n2)) {
             return 0;
         }
         return Infinity;
