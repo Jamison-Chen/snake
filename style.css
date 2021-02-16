@@ -1,72 +1,55 @@
-/* html {
-    min-width: 1092px;
-} */
-
 body {
     height: 100vh;
+    width: 100vw;
     margin: 0;
+    padding: 0;
     display: flex;
     flex-direction: row;
+    justify-content: center;
 }
 
 #main {
-    padding: 0% 2%;
-    width: 85%;
+    padding: 20px 0;
+    width: max-content;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+.each-row {
+    width: 580px;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    justify-content: center;
+}
+
+.cell {
+    border: 1px solid #AAA;
+    width: 29px;
+    height: 29px;
+    user-select: none;
+    margin: 0;
+    padding: 0;
+}
+
+#side-bar {
+    padding: 10px;
+    width: 180px;
     display: flex;
     flex-direction: column;
     justify-content: center;
 }
-
-.each-row {
-    width: 100%;
-    margin: 0%;
-    display: flex;
-    flex-direction: row;
-    flex-wrap: nowrap;
-}
-
-.cell {
-    border-style: solid;
-    border-bottom-width: 1px;
-    border-left-width: 1px;
-    border-top-width: 0px;
-    border-right-width: 0px;
-    border-color: #aaa;
-    user-select: none;
-}
-
-#side-bar {
-    background-color: #fff6e7;
-    padding: 2%;
-    width: 15%;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-}
-
-#upper-side {
-    margin: 0;
-    padding: 0;
-    display: flex;
-    flex-direction: column;
-    justify-content: start;
-}
-
-
-/* #lower-side {
-    margin: 0;
-    padding: 0;
-    display: flex;
-    flex-direction: column;
-    justify-content: end;
-} */
 
 .btn {
     height: fit-content;
     border: none;
     font-size: 1.2em;
     padding: 10px 0px;
-    margin: 15px 0px;
+    margin: 15px;
     border-radius: 8px;
     transition-duration: 250ms;
 }
@@ -74,25 +57,6 @@ body {
 .btn:focus {
     outline: 0;
 }
-
-
-/* #clear-board-btn,
-#hide-result-btn {
-    color: #fff;
-    background-color: #afafaf;
-} */
-
-
-/* #clear-board-btn:hover,
-#hide-result-btn:hover {
-    background-color: #a5a5a5;
-} */
-
-
-/* #clear-board-btn:active,
-#hide-result-btn:active {
-    background-color: #9b9b9b;
-} */
 
 #play-btn {
     color: #fff;
@@ -126,4 +90,11 @@ body {
 
 #dijkstra-btn:disabled {
     background-color: #CCC;
+}
+
+#current-length {
+    text-align: center;
+    margin: 15px;
+    font-size: 2.4rem;
+    font-weight: 900;
 }

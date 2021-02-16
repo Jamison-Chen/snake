@@ -7,7 +7,10 @@ import {
 const dijkstraBtn = document.getElementById("dijkstra-btn");
 const playBtn = document.getElementById("play-btn");
 const main = document.getElementById("main");
+const currentLength = document.getElementById("current-length");
 const size = 20;
+const bodyColor = "#000";
+
 let grid;
 let allNodes;
 let allEdgesAndCosts;
@@ -27,6 +30,8 @@ let deepPath;
 // }
 
 // test();
+
+setup();
 
 function dijkstra() {
     let currentDistance = {};
@@ -108,14 +113,15 @@ function arrary2graphInfo(aGrid) {
 }
 
 function setup() {
-    initGridDOM();
     initVarVal();
+    initGridDOM();
     clearBoard();
+    correctBodyStyle();
     addAllEventListener();
 }
 
 function initGridDOM() {
-    let divSideLen = 55 / size;
+    // let divSideLen = 100 / size;
     for (let i = 0; i < size; i++) {
         let rowDiv = document.createElement("div");
         rowDiv.setAttribute("class", "each-row");
@@ -123,19 +129,8 @@ function initGridDOM() {
             let cellDiv = document.createElement("div");
             cellDiv.setAttribute("id", `${i},${j}`);
             cellDiv.setAttribute("class", "cell");
-            cellDiv.style.width = `${divSideLen}%`;
-            cellDiv.style.height = "0";
-            cellDiv.style.paddingTop = `${divSideLen}%`;
-            cellDiv.style.border = "1px solid";
-            // if (i == 0) {
-            //     cellDiv.style.borderTopWidth = "1px";
-            // }
-            // if (j == size - 1) {
-            //     cellDiv.style.borderRightWidth = "1px";
-            //     if (i == size - 1) {
-            //         cellDiv.style.borderRightWidth = "1px";
-            //     }
-            // }
+            // cellDiv.style.width = `${divSideLen}%`;
+            // cellDiv.style.paddingTop = `${divSideLen}%`;
             rowDiv.appendChild(cellDiv);
         }
         main.appendChild(rowDiv);
@@ -148,12 +143,15 @@ function initVarVal() {
         [9, 2],
         [9, 3]
     ];
+    storedTail = [];
     foodPos = [9, 15];
     stillAlive = true;
     deepPath = [];
     directions = [
         [0, 1]
     ];
+    inertia = [];
+    currentLength.innerHTML = body.length + 1;
 }
 
 function clearBoard() {
@@ -168,22 +166,22 @@ function clearBoard() {
 }
 
 function addAllEventListener() {
-    playBtn.onclick = startPlaying;
+    playBtn.onclick = humanPlaying;
     playBtn.disabled = false;
-    // document.getElementById("clear-board-btn").onclick = clearBoard;
     dijkstraBtn.onclick = dijkstraPlaying;
     dijkstraBtn.disabled = false;
 }
 
-function startPlaying() {
+function humanPlaying() {
     removeAllEventListener("human");
-    document.addEventListener("keydown", moveSnake);
+    document.addEventListener("keydown", turnAroundSnake);
     initVarVal();
     clearBoard();
+    correctBodyStyle();
     humanLoop();
 }
 
-function moveSnake(e) {
+function turnAroundSnake(e) {
     if (e.keyCode == '38') { //up
         if (directions.length == 0) {
             if (inertia[0] != 1) {
@@ -293,32 +291,7 @@ function dijkstraLoop() {
                 stillAlive = false
             }
 
-            // Random Strategy
-            // let randomTargets = [];
-            // if (headPos[0] > 0) {
-            //     if (grid[headPos[0] - 1][headPos[1]].isBlank) {
-            //         randomTargets.push([headPos[0] - 1, headPos[1]]);
-            //     }
-            // }
-            // if (headPos[0] < size - 1) {
-            //     if (grid[headPos[0] + 1][headPos[1]].isBlank) {
-            //         randomTargets.push([headPos[0] + 1, headPos[1]]);
-            //     }
-            // }
-            // if (headPos[1] > 0) {
-            //     if (grid[headPos[0]][headPos[1] - 1].isBlank) {
-            //         randomTargets.push([headPos[0], headPos[1] - 1]);
-            //     }
-            // }
-            // if (headPos[1] < size - 1) {
-            //     if (grid[headPos[0]][headPos[1] + 1].isBlank) {
-            //         randomTargets.push([headPos[0], headPos[1] + 1]);
-            //     }
-            // }
-            // moveForward([
-            //     [],
-            //     randomTargets[Math.floor(Math.random() * randomTargets.length)]
-            // ]);
+            // Machine-Learning Strategy
         }
         setTimeout(dijkstraLoop, 0);
     } else {
@@ -357,6 +330,7 @@ function moveForward(aPath, mode) {
         let removedBody = body.shift();
         grid[removedBody[0]][removedBody[1]].setBlank(document.getElementById(`${removedBody[0]},${removedBody[1]}`));
     }
+    correctBodyStyle();
 }
 
 function growthUp() {
@@ -365,6 +339,7 @@ function growthUp() {
 }
 
 function placeNewFood() {
+    currentLength.innerHTML = body.length + 1;
     let blankCells = [];
     for (let i = 0; i < size; i++) {
         for (let j = 0; j < size; j++) {
@@ -389,9 +364,8 @@ function stopPlaying() {
 
 function removeAllEventListener(mode) {
     if (mode != "human") {
-        document.removeEventListener("keydown", moveSnake);
+        document.removeEventListener("keydown", turnAroundSnake);
     }
-    // document.getElementById("clear-board-btn").onclick = null;
     playBtn.onclick = undefined;
     playBtn.disabled = true;
     dijkstraBtn.onclick = undefined;
@@ -406,4 +380,30 @@ function initSnakeAndFood() {
     grid[foodPos[0]][foodPos[1]].setFood(document.getElementById(`${foodPos[0]},${foodPos[1]}`));
 }
 
-setup();
+function correctBodyStyle() {
+    for (let i = 0; i < body.length; i++) {
+        const cellDiv = document.getElementById(`${body[i][0]},${body[i][1]}`);
+        if (body[i - 1] != undefined) {
+            if (body[i - 1][0] == body[i][0] && body[i - 1][1] < body[i][1]) {
+                cellDiv.style.borderLeftColor = bodyColor;
+            } else if (body[i - 1][0] == body[i][0] && body[i - 1][1] > body[i][1]) {
+                cellDiv.style.borderRightColor = bodyColor;
+            } else if (body[i - 1][1] == body[i][1] && body[i - 1][0] < body[i][0]) {
+                cellDiv.style.borderTopColor = bodyColor;
+            } else if (body[i - 1][1] == body[i][1] && body[i - 1][0] > body[i][0]) {
+                cellDiv.style.borderBottomColor = bodyColor;
+            }
+        }
+        if (body[i + 1] != undefined) {
+            if (body[i + 1][0] == body[i][0] && body[i + 1][1] < body[i][1]) {
+                cellDiv.style.borderLeftColor = bodyColor;
+            } else if (body[i + 1][0] == body[i][0] && body[i + 1][1] > body[i][1]) {
+                cellDiv.style.borderRightColor = bodyColor;
+            } else if (body[i + 1][1] == body[i][1] && body[i + 1][0] < body[i][0]) {
+                cellDiv.style.borderTopColor = bodyColor;
+            } else if (body[i + 1][1] == body[i][1] && body[i + 1][0] > body[i][0]) {
+                cellDiv.style.borderBottomColor = bodyColor;
+            }
+        }
+    }
+}

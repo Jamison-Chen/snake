@@ -33,7 +33,6 @@ export class Cell {
         this.isFood = false;
         this.isBlank = false;
         DOMelement.style.backgroundColor = bodyColor;
-        DOMelement.style.borderColor = bodyColor;
     }
     setFood(DOMelement) {
         this.isBody = false;
